@@ -1,0 +1,25 @@
+Creating a book recommendation system webpage.
+
+Webpage functionalities:
+Build users profile
+Suggest books for a user based on the users profile. 
+
+Users Profile
+The users profile should be built of five books the user selects and rates.
+
+For non-reader users:
+The user would be made to choose genres they are interested in and the website would provide the highest rated books in those genres.
+
+
+For this to work, I'd need to:
+1. Clean and create a sparse matrix from the book ratings.
+2. K-Nearest model fitting.
+3. Figure out how to add the user profile to the sparse matrix.
+Option A: Add it to the dataset before creating the sparse matrix.
+Option B: Find the person most similar to the user in the dataset, and use that instead (Last resort).
+
+
+For the webpage:
+1. Create a list of all the books.
+2. use a hashmap to convert the chosen books to the respective Ids.
+
