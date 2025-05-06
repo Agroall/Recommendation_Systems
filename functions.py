@@ -1,42 +1,37 @@
+import pandas as pd
+from scipy.sparse import csr_matrix
+from sklearn.neighbors import NearestNeighbors
+
+ratings = pd.read_csv('book_crossing/book_crossing/book_ratings.dat', delimiter = '\t')
+history = pd.read_csv('book_crossing/book_crossing/book_history.dat', delimiter = '\t') # Books and readers history.
+items = pd.read_csv('book_crossing/book_crossing/items_info_clean.dat', delimiter = '\t', on_bad_lines='skip')  # list of books and Ids (Primary id key)
+
+# Book mapping
+book_titles = dict(zip(items['Book_ID'], items['Book-Title']))
+inv_book_titles = dict(zip(items['Book-Title'], items['Book_ID']))
+
 # Sparse matrix function
 def sparse_matrix(df, user_id_name, item_id_name, rating_column_name):
     """
-    This function helps to create a sparse matrix (a matrix largely populated by zeroes) from your ratings dataset.
-    
-    Parameters:
-    df: Pandas DataFrame
-    user_id_name (str): Column name of the user ID.
-    item_id_name (str): Column name of the item ID.
-    rating_column_name (str): Column name of the ratings.
-    
-    Returns:
-    - matrix: the resulting sparse matrix
-    - user_map: a dictionary mapping original user IDs to matrix row indices
-    - item_map: a dictionary mapping original item IDs to matrix column indices
-    - inv_user_map: inverse mapping from row indices back to original user IDs
-    - inv_item_map: inverse mapping from column indices back to original item IDs
+    Create a sparse user-item matrix from a dataframe.
+    Returns the item and user matrices, mapping dictionaries, and inverse mappings.
     """
-    
-    # Stores the number of unique users and items in the dataset.
-    # This is used in determining the shape of the sparse matrix.
-    n_users = df[user_id_name].nunique()
-    n_items = df[item_id_name].nunique()
 
-    # Creates a map of the user/item IDs to new sequential indices.
-    user_map = dict(zip(df[user_id_name].unique(), list(range(n_users))))
-    item_map = dict(zip(df[item_id_name].unique(), list(range(n_items))))
+    # Factorize ensures a consistent mapping
+    df[user_id_name], user_idx = pd.factorize(df[user_id_name])
+    df[item_id_name], item_idx = pd.factorize(df[item_id_name])
 
-    # Creates the inverse map of user/item IDs for referencing purposes.
-    inv_user_map = dict(zip(list(range(n_users)), df[user_id_name].unique()))
-    inv_item_map = dict(zip(list(range(n_items)), df[item_id_name].unique()))
+    user_map = dict(zip(user_idx, range(len(user_idx))))
+    item_map = dict(zip(item_idx, range(len(item_idx))))
+    inv_user_map = dict(enumerate(user_idx))
+    inv_item_map = dict(enumerate(item_idx))
 
-    # Applies the new IDs to create index lists.
-    user_index = [user_map[i] for i in df[user_id_name]]
-    item_index = [item_map[i] for i in df[item_id_name]]
+    user_index = df[user_id_name]
+    item_index = df[item_id_name]
+    ratings = df[rating_column_name].astype(float)
 
-    # Creates the sparse matrix using Compressed Sparse Row (csr) format.
-    item_matrix = csr_matrix((df[rating_column_name], (item_index, user_index)), shape=(n_items, n_users))
-    user_matrix = csr_matrix((df[rating_column_name], (user_index, item_index)), shape=(n_users, n_items))
+    item_matrix = csr_matrix((ratings, (item_index, user_index)))
+    user_matrix = csr_matrix((ratings, (user_index, item_index)))
 
     return item_matrix, user_matrix, user_map, item_map, inv_user_map, inv_item_map
 
@@ -86,8 +81,8 @@ def similar_users_suggestions(user_item_list, user_rating_list, df, user_id, n_s
 
     # Step 5: Fit KNN to user matrix
     k = n_similar_users + 1  # +1 to include the new user
-    user_loc = user_map[user]
-    user_vector = user_matrix[user_loc]
+    # user_loc = user_map[user]
+    user_vector = user_matrix[user]
 
     KNN = NearestNeighbors(n_neighbors=k, algorithm='brute', metric=metric)
     KNN.fit(user_matrix)
