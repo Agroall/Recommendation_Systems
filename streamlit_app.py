@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 from scipy.sparse import csr_matrix
 from sklearn.neighbors import NearestNeighbors
+from functions import sparse_matrix, similar_users_suggestions, similar_books
 
 
 # Configuration
@@ -26,3 +27,12 @@ available_book_list = [book_titles[i] for i in ratings['item'].unique()]
 user_item_list = []
 user_rating_list = []
 
+
+# Streamlit text sections, header, tite, sub headers
+
+
+
+
+
+st.markdown('---')
+st.markdown('This application was created by Abatan Ayodeji (Agroall).')
