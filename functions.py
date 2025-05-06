@@ -39,59 +39,38 @@ def sparse_matrix(df, user_id_name, item_id_name, rating_column_name):
 # User similarity function
 def similar_users_suggestions(user_item_list, user_rating_list, df, user_id, n_similar_users, metric='cosine'):
     """
-    Generates personalized book recommendations by identifying similar users using K-Nearest Neighbors (KNN).
-
-    This function creates a synthetic user based on their rated books and computes their similarity
-    to existing users in the dataset. It then recommends the top-rated book from each of the most similar users.
-
-    Args:
-        user_item_list (list of str): A list of book titles the new user has rated.
-        user_rating_list (list of float): A list of ratings corresponding to the `user_item_list`.
-        df (pd.DataFrame): The user-item ratings dataframe with columns ['user', 'item', 'rating'].
-        user_id (str): The name of the user ID column in `df`.
-        n_similar_users (int): Number of similar users to retrieve.
-        metric (str, optional): Similarity metric to use for KNN. Defaults to 'cosine'.
-
-    Returns:
-        list of str: A list of top-rated book titles from each of the `n_similar_users` most similar users.
-
-    Notes:
-        - `book_titles` and `inv_book_titles` must be defined globally:
-            - `book_titles` maps book ID to title
-            - `inv_book_titles` maps title to book ID
-        - If a neighbor has no rated books, they are skipped.
+    Generates personalized book recommendations by identifying similar users using KNN.
     """
-
-    # Step 1: Create a new user ID and copy dataframe to avoid mutation
-    user = df[user_id].max() + 1
+    # Step 1: Create a synthetic new user ID (one greater than current max)
+    new_user_id = df[user_id].max() + 1
     df = df.copy()
 
-    # Step 2: Map book titles to book IDs
+    # Step 2: Convert book titles to internal book IDs
     user_item_id = [inv_book_titles[i] for i in user_item_list]
 
-    # Step 3: Add the new user's ratings to the DataFrame
+    # Step 3: Add the new user and their ratings to the DataFrame
     for index, item_id in enumerate(user_item_id):
-        new_row = {'user': user, 'item': item_id, 'rating': user_rating_list[index]}
-        df.loc[len(df)] = new_row
+        df.loc[len(df)] = {'user': new_user_id, 'item': item_id, 'rating': user_rating_list[index]}
 
-    # Step 4: Create new sparse matrices from updated df
+    # Step 4: Rebuild sparse matrix with new user included
     item_matrix, user_matrix, user_map, item_map, inv_user_map, inv_item_map = sparse_matrix(
         df, 'user', 'item', 'rating'
     )
 
-    # Step 5: Fit KNN to user matrix
-    k = n_similar_users + 1  # +1 to include the new user
-    # user_loc = user_map[user]
-    user_vector = user_matrix[user]
+    # Step 5: Get the matrix row index for the new user
+    new_user_matrix_index = user_matrix.shape[0] -1
+    user_vector = user_matrix[new_user_matrix_index]
 
+    # Step 6: Fit KNN and find neighbors
+    k = n_similar_users + 1  # +1 to include the new user in neighbors
     KNN = NearestNeighbors(n_neighbors=k, algorithm='brute', metric=metric)
     KNN.fit(user_matrix)
-    neighbours = KNN.kneighbors(user_vector.reshape(1, -1), return_distance=False)
+    neighbours = KNN.kneighbors(user_vector, return_distance=False)
 
-    # Step 6: Get similar user IDs, skipping the first (which is the new user)
-    neighbouring_user_ids = [inv_user_map[n] for n in neighbours.flatten()[1:]]
+    # Step 7: Map back to user IDs, skipping the new user itself
+    neighbouring_user_ids = [inv_user_map[n] for n in neighbours.flatten() if inv_user_map[n] != new_user_id]
 
-    # Step 7: Get top-rated books from each neighbour
+    # Step 8: Pick top-rated books from similar users
     book_suggestions = []
     for uid in neighbouring_user_ids:
         user_books = df[df['user'] == uid]
