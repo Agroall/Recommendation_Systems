@@ -120,7 +120,7 @@ st.markdown("---")
 
 # Sidebar for general settings
 st.sidebar.header("🎛️ General Settings")
-k = st.sidebar.slider("Number of Recommendations", min_value=1, max_value=10, value=5)
+k = st.sidebar.slider("Number of Recommendations", min_value=1, max_value=10)#, value=5)
 
 # --- USER-BASED SUGGESTIONS ---
 st.subheader("👤 User-Based Recommendations")
@@ -141,7 +141,7 @@ if selected_books and user_rating_list:
             selected_books, user_rating_list, ratings, 'user', k
         )
     st.success("Here are your personalized book suggestions:")
-    for i, suggestion in enumerate(book_suggestions, 1):
+    for i, suggestion in enumerate(book_suggestions):
         st.markdown(f"**{i}. {suggestion}**")
 else:
     st.info("Select and rate at least one book to get user-based recommendations.")
