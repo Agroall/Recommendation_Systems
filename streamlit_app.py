@@ -105,7 +105,7 @@ items = pd.read_csv('book_crossing/book_crossing/items_info_clean.dat', delimite
 # Book title mapping
 book_titles = dict(zip(items['Book_ID'], items['Book-Title']))
 inv_book_titles = dict(zip(items['Book-Title'], items['Book_ID']))
-available_book_list = [book_titles[i] for i in ratings['item'].unique() if i in book_titles]
+available_book_list = sorted([book_titles[i] for i in ratings['item'].unique() if i in book_titles])
 
 # Title and description
 st.title("📚 Book Recommendation App")
@@ -119,8 +119,10 @@ Get book suggestions based on your past reading preferences or find books simila
 st.markdown("---")
 
 # Sidebar for general settings
+st.sidebar.write("")
+st.sidebar.write("")
 st.sidebar.header("🎛️ General Settings")
-k = st.sidebar.slider("Number of Recommendations", min_value=1, max_value=10)#, value=5)
+k = st.sidebar.slider("Number of Recommendations", min_value=1, max_value=10)
 
 # --- USER-BASED SUGGESTIONS ---
 st.subheader("👤 User-Based Recommendations")
@@ -142,7 +144,7 @@ if selected_books and user_rating_list:
         )
     st.success("Here are your personalized book suggestions:")
     for i, suggestion in enumerate(book_suggestions):
-        st.markdown(f"**{i}. {suggestion}**")
+        st.markdown(f"**{i+1}. {suggestion}**")
 else:
     st.info("Select and rate at least one book to get user-based recommendations.")
 

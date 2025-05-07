@@ -79,7 +79,7 @@ def similar_users_suggestions(user_item_list, user_rating_list, df, user_id, n_s
             book_id = int(best_book.values[0])
             book_suggestions.append(book_titles[book_id])
 
-    return book_suggestions
+    return sorted(book_suggestions)
 
 
 # item similarity fuction
@@ -122,5 +122,6 @@ def similar_books(book, df, k, metric='cosine'):
     similar_ids = [inv_item_map[idx] for idx in neighbours[1:]]
 
     # Map item IDs back to book titles
-    return [book_titles[item_id] for item_id in similar_ids]
+    return sorted([book_titles[item_id] for item_id in similar_ids])
+    
 
