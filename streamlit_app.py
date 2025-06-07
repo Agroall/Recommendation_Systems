@@ -78,8 +78,6 @@
 # st.markdown('This application was created by Abatan Ayodeji (Agroall).')
 
 
-
-
 import streamlit as st
 import pandas as pd
 from scipy.sparse import csr_matrix
@@ -167,5 +165,5 @@ if selected_book:
         st.markdown(f"**{i}. {title}**")
 
 st.markdown("---")
-st.caption("Developed by Abatan Ayodeji (Agroall) • Built with ❤️ using Streamlit")
+st.caption("Developed with ❤️ by Abatan Ayodeji (Agroall) • Built using Streamlit")
 
