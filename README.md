@@ -1,7 +1,7 @@
 # 📚 Book Recommendation System
 
 A collaborative filtering book recommender system built using Python and Streamlit. 
-This project provides user-based and item-based recommendation engines using real-world data from the [Book-Crossing dataset](http://www2.informatik.uni-freiburg.de/~cziegler/BX/).
+This project provides user-based and item-based recommendation engines using real-world data from the [Book-Crossing dataset](https://github.com/caserec/Datasets-for-Recommender-Systems/blob/master/Processed%20Datasets/BookCrossing/README.md).
 
 > ✅ Try the app live: [Click here to get your next book recommendation!](https://get-your-book-recommendations.streamlit.app/)
 
